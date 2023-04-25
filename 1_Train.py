@@ -9,24 +9,23 @@ import pickle
 import time
 import io
 from sdv.multi_table import HMASynthesizer
+import base64
 
 
 SEED = random.seed(9001)
 
 
 def train_model_demo(metadata, real_data):
-
     with open("./Pepsico App/model/SDVv1.0_Dunhumby_0.01.pkl", "rb") as f:
         model = pickle.load(f)
 
     pkl_model = io.BytesIO()
     pickle.dump(model, pkl_model)
-    
+
     return pkl_model
 
 
 def train_model_real(metadata, real_data):
-
     # Step 1: Create the synthesizer
     synthesizer = HMASynthesizer(metadata)
 
@@ -36,12 +35,25 @@ def train_model_real(metadata, real_data):
     # save the pickle model
     pkl_model = io.BytesIO()
     pickle.dump(synthesizer, pkl_model)
-    
+
     return pkl_model
 
 
-if __name__ == "__main__":
+def sidebar_ui():
+    img = "./pepsico-logo.png"
+    st.markdown(
+         f"""
+        <style>
+            <center><img  src="data:image/png;base64,{base64.b64encode(open(img, "rb").read()).decode()}"></center>
+            
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
+if __name__ == "__main__":
+    with st.sidebar:
+        sidebar_ui()
     st.header("Upload files")
 
     fu1, fu2 = st.columns(2)
@@ -64,10 +76,12 @@ if __name__ == "__main__":
         # create filters for the two columns
         filter1, filter2 = st.columns(2)
         REGION_filter = filter1.multiselect(
-            label="REGION", options=REGION_options,
+            label="REGION",
+            options=REGION_options,
         )
         STORE_TYPE_filter = filter2.multiselect(
-            label="STORE TYPE", options=STORE_TYPE_options,
+            label="STORE TYPE",
+            options=STORE_TYPE_options,
         )
 
         store_frac = st.slider(
@@ -80,22 +94,25 @@ if __name__ == "__main__":
 
         st.divider()
 
-        
-        store_df = store_df[store_df['STORE_TYPE'].isin(STORE_TYPE_filter)&
-                                      store_df['REGION'].isin(REGION_filter)] 
-        store_df = store_df.sample(
-            frac=store_frac, random_state=SEED
-        )
+        store_df = store_df[
+            store_df["STORE_TYPE"].isin(STORE_TYPE_filter)
+            & store_df["REGION"].isin(REGION_filter)
+        ]
+        store_df = store_df.sample(frac=store_frac, random_state=SEED)
 
         # read the transaction data
         transaction_df = pd.read_csv("./Pepsico App/real_data/transactions_store.csv")
-        transaction_df =  transaction_df[transaction_df['STORE_ID'].isin(store_df.STORE_ID)]
-        transaction_df = transaction_df.sample(frac=0.1)  
+        transaction_df = transaction_df[
+            transaction_df["STORE_ID"].isin(store_df.STORE_ID)
+        ]
+        transaction_df = transaction_df.sample(frac=0.1)
 
         # read the product data
         product_df = pd.read_csv("./Pepsico App/real_data/product.csv")
-        product_df = product_df[['PRODUCT_ID',	'DEPARTMENT',	'BRAND']]
-        product_df =  product_df[product_df['PRODUCT_ID'].isin(transaction_df.PRODUCT_ID)]
+        product_df = product_df[["PRODUCT_ID", "DEPARTMENT", "BRAND"]]
+        product_df = product_df[
+            product_df["PRODUCT_ID"].isin(transaction_df.PRODUCT_ID)
+        ]
 
         # 1. Collect all the tables in a dict
         real_data = {}
@@ -116,11 +133,15 @@ if __name__ == "__main__":
 
         st.write(st.session_state.get("real_data"))
 
-        _, bt1, _ = st.columns([2, 2, 1]) # train model button container
-        _, bt2, _ = st.columns([1.7, 2, 1]) # download model button container
+        _, bt1, _ = st.columns([2, 2, 1])  # train model button container
+        _, bt2, _ = st.columns([1.7, 2, 1])  # download model button container
         train_button = bt1.button(label="Train Model")
         if train_button:
             pkl_model = train_model_demo(metadata="", real_data=real_data)
 
-            model_save_filename = f'SDVv1.0_Dunhumby_{store_frac}.pkl'
-            bt2.download_button(label="Download .pkl model", data=pkl_model, file_name=model_save_filename)
+            model_save_filename = f"SDVv1.0_Dunhumby_{store_frac}.pkl"
+            bt2.download_button(
+                label="Download .pkl model",
+                data=pkl_model,
+                file_name=model_save_filename,
+            )
