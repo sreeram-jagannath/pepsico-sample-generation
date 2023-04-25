@@ -4,7 +4,6 @@ import random
 import pandas as pd
 import os
 import json
-import xmltodict
 import pickle
 import time
 import io
