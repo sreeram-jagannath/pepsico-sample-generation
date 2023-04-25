@@ -1,11 +1,16 @@
 import streamlit as st
 from sdv.evaluation.multi_table import get_column_plot
+from ui import sidebar_ui
+
 
 options = {
-    "store": ["REGION"],
-    "transaction": ["SALES_VALUE"],
-    "product": [],
+    "store": ["STORE_TYPE", "REGION"],
+    "transaction": ["QUANTITY",	"SALES_VALUE",	"TRANS_TIME",],
+    "product": ["DEPARTMENT", "BRAND"],
 }
+
+with st.sidebar:
+    sidebar_ui()
 
 
 table_select = st.selectbox(label="Select Table", options=options.keys(), index=0)
