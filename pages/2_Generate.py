@@ -65,7 +65,7 @@ if trained_model_pkl:
         # st.write(f'{quality_report.get_properties()}')
 
         zip_path = f"synthetic_data.zip"
-        files = glob.glob("./Pepsico App/synth_data/*.xlsx")
+        files = glob.glob("../Pepsico App/synth_data/*.xlsx")
 
         with zipfile.ZipFile(zip_path, "w") as zipObj:
             for file in files:
