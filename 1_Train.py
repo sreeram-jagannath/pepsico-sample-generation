@@ -65,8 +65,8 @@ if __name__ == "__main__":
 
     metadata_file = fu1.file_uploader(label="Metadata", type="json")
     store_file = fu2.file_uploader(label="Store data", type="csv")
-    product_file = fu3.file_uploader(label="Product file", type="csv")
-    transaction_file = fu4.file_uploader(label="Transaction file", type="csv")
+    product_file = fu3.file_uploader(label="Product data", type="csv")
+    transaction_file = fu4.file_uploader(label="Transaction data", type="csv")
 
     st.divider()
 
